@@ -1,17 +1,27 @@
 const express = require('express');
+const User = require('../../../models/User');
 const router = express.Router();
-const Uer = require('../../../models/User');
+const bcrypt = require('bcryptjs');
 
 // router.get('/api/users/register');
 router.post('/', async (req, res) => {
-  const user = new User({
-    email: req.body.email,
-    password: req.body.password,
-  });
+  try {
+    const { email, password } = req.body;
 
-  await user.save();
+    const user = new User({
+      email: email,
+      password: password,
+    });
 
-  res.json({ msg: 'votre compte a été créé depuis register.js' });
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(user.password, salt);
+
+    await user.save();
+
+    res.json({ msg: 'votre compte a été créé depuis register.js' });
+  } catch (e) {
+    res.status(500).json({ msg: e.message });
+  }
 });
 
 module.exports = router;

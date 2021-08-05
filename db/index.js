@@ -2,13 +2,16 @@ const mongoose = require('mongoose');
 
 async function dbconnexion() {
   try {
-    await mongoose.connect(process.env.DB_CONNEXION, {
+    const conn = await mongoose.connect(process.env.DB_CONNEXION, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useFindAndModify: false,
       useCreateIndex: true,
     });
 
+    mongoose.connection.on('error', (erro) => {
+      console.log(err.message);
+    });
     console.log('Mongoose connected !!');
   } catch (e) {
     console.log(e.message);

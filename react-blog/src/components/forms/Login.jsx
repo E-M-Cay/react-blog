@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import Notification from '../layouts/pageComponents/Notification';
 import LinkBack from '../layouts/pageComponents/LinkBack';
-import { validateEmail } from "../utilities";
+import { validateEmail } from '../utilities';
 
 const Login = () => {
     // Un State pour le formulaire.
     const [formData, setFormData] = useState({
-       email: '',
-       password: '',
+        email: '',
+        password: '',
     });
 
     // Pour notifications
@@ -16,24 +16,38 @@ const Login = () => {
     const [level, setLevel] = useState('alert-success');
     // Récupérer les données des inputs
     const onChangeHandler = e => {
-        setFormData({...formData, [e.target.name]: e.target.value });
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const onSubmitHandler = e => {
         e.preventDefault();
 
-        const {email} = formData;
+        const { email } = formData;
 
         // Validation
         // Vérifier que les mots de passe sont les mêmes
         // Vérifier que l'email est un email
-        if(!validateEmail(email)) {
+        if (!validateEmail(email)) {
             return maybeNotify('Formulaire invalide', 'alert-danger');
         }
 
         // enregistrer formData dans localStorage.
         // Envoie sur le serveur
         localStorage.setItem('contact', JSON.stringify(formData));
+
+        fetch('/api/users/login', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json' },
+            body: JSON.stringify(formData),
+        })
+            .then(res => {
+                if (res.ok) {
+                    return res.json();
+                }
+                throw new Error("Une erreur s'est produite");
+            })
+            .then(data => setMessage(data.msg))
+            .catch(err => console.log(err.message));
 
         e.target.reset();
 
@@ -50,8 +64,6 @@ const Login = () => {
             setMessage('');
         }, 5000);
     };
-
-
 
     return (
         <article className="container mt-5">
